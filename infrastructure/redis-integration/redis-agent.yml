@@ -1,0 +1,14 @@
+# Redis integration for Elastic Agent / Metricbeat
+inputs:
+  - type: redis
+    enabled: true
+    streams:
+      - id: redis-server
+        dataset: redis.server
+        metricsets: ["info", "keyspace"]
+        period: 10s
+        hosts: ["${REDIS_HOST:redis}:${REDIS_PORT:6379}"]
+        password: "${REDIS_PASSWORD:}"
+        tags: ["infrastructure","redis","environment:staging"]
+        processors:
+          - add_host_meta~

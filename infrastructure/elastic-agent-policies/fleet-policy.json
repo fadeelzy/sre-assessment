@@ -1,0 +1,35 @@
+{
+  "policy": {
+    "name": "sre-assessment-policy",
+    "namespace": "observability",
+    "inputs": [
+      {
+        "type": "logfile",
+        "streams": [
+          {
+            "paths": ["/var/log/frontend/*.log"],
+            "service.name": "frontend"
+          }
+        ]
+      },
+      {
+        "type": "logfile",
+        "streams": [
+          {
+            "paths": ["/var/log/cartservice/*.log"],
+            "service.name": "cartservice"
+          }
+        ]
+      },
+      {
+        "type": "logfile",
+        "streams": [
+          {
+            "paths": ["/var/log/paymentservice/*.log"],
+            "service.name": "paymentservice"
+          }
+        ]
+      }
+    ]
+  }
+}

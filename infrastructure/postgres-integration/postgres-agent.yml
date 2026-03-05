@@ -1,0 +1,17 @@
+# Postgres integration (Elastic Agent / Metricbeat style)
+inputs:
+  - type: jdbc
+    enabled: true
+    streams:
+      - id: postgresql-metrics
+        dataset: postgresql.metrics
+        metricsets: ["database", "bgwriter", "activity"]
+        period: 10s
+        jdbc:
+          connection_string: "jdbc:postgresql://${POSTGRES_HOST:postgres}:${POSTGRES_PORT:5432}/${POSTGRES_DB:postgres}?sslmode=${PGSSLMODE:disable}"
+          user: "${POSTGRES_USER:postgres}"
+          password: "${POSTGRES_PASSWORD:}"
+        tags: ["infrastructure","postgres","environment:staging"]
+        processors:
+          - add_host_meta~
+          - add_cloud_meta~

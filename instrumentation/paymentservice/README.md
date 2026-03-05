@@ -1,0 +1,3 @@
+- Require: require('./otel') at top of app entry before other imports to start auto-instrumentation.
+- Env: OTEL_EXPORTER_OTLP_ENDPOINT default as gateway FQDN.
+- Use startPaymentSpan(...) around payment validation and record exceptions via span.recordException(err).

@@ -1,0 +1,23 @@
+# NGINX integration (metrics + logs)
+inputs:
+  - type: nginx
+    enabled: true
+    streams:
+      - id: nginx-status
+        dataset: nginx.status
+        metricsets: ["stubstatus"]
+        period: 10s
+        hosts: ["http://${NGINX_HOST:nginx}:${NGINX_STATUS_PORT:8080}/stub_status"]
+        tags: ["infrastructure","nginx","environment:staging"]
+      - id: nginx-access
+        dataset: nginx.access
+        log:
+          enabled: true
+          var.paths: ["/var/log/nginx/access.log"]
+      - id: nginx-error
+        dataset: nginx.error
+        log:
+          enabled: true
+          var.paths: ["/var/log/nginx/error.log"]
+    processors:
+      - add_host_meta~

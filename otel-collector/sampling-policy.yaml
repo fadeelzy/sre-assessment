@@ -1,0 +1,21 @@
+tail_sampling:
+  decision_wait: 10s
+  num_traces: 1000
+  policies:
+    - name: "sample-errors"
+      type: "status_code"
+      status_code:
+        status_codes: [ERROR]
+    - name: "sample-slow-requests"
+      type: "latency"
+      latency:
+        threshold_ms: 500
+    - name: "sample-health-checks-low"
+      type: "string_attribute"
+      string_attribute:
+        key: "http.url"
+        values: [".*/health.*"]
+    - name: "sample-all-else-probabilistic"
+      type: "probabilistic"
+      probabilistic:
+        sampling_percentage: 10

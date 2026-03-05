@@ -1,0 +1,78 @@
+image:
+  repository: otel/opentelemetry-collector-contrib
+
+mode: deployment
+
+replicaCount: 1
+
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:4317"
+        http:
+          endpoint: "0.0.0.0:4318"
+    zipkin:
+      endpoint: "0.0.0.0:9411"
+
+  processors:
+    memory_limiter:
+      check_interval: 1s
+      limit_percentage: 75
+      spike_limit_percentage: 15
+    batch:
+      timeout: 10s
+    tail_sampling:
+      decision_wait: 10s
+      num_traces: 1000
+      policies:
+        [
+          {
+            name: "sample-errors",
+            type: "status_code",
+            status_code: { status_codes: [ERROR] }
+          },
+          {
+            name: "sample-slow-requests",
+            type: "latency",
+            latency: { threshold_ms: 500 }
+          },
+          {
+            name: "sample-health-checks-low",
+            type: "string_attribute",
+            string_attribute: { key: "http.url", values: [".*/health.*"] }
+          },
+          {
+            name: "sample-all-else-probabilistic",
+            type: "probabilistic",
+            probabilistic: { sampling_percentage: 10 }
+          }
+        ]
+  exporters:
+    otlphttp:
+      endpoint: "https://my-observability-project-d46b5c.ingest.us-central1.gcp.elastic.cloud:443"
+      headers:
+        Authorization: "ApiKey ${ELASTIC_APM_TOKEN}"
+
+  service:
+    pipelines:
+      traces:
+        receivers: [otlp, zipkin]
+        processors: [memory_limiter, batch, tail_sampling]
+        exporters: [otlphttp]
+      metrics:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [otlphttp]
+      logs:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [otlphttp]
+
+extraEnvs:
+  - name: ELASTIC_APM_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: elastic-apm-token
+        key: token
